@@ -2,19 +2,25 @@ using System.Runtime.InteropServices;
 
 namespace poolViewer.Pool;
 
+public enum PoolType
+{
+    Paged,
+    NonPaged
+};
+
 internal class PoolDataHandler()
 {
     private SystemPoolTagInformation _poolTagInfo;
     private readonly nint _outputBuffer = Marshal.AllocHGlobal(OsLibraryAccess.PoolTagSize);
 
-    public SortedDictionary<string, SystemPoolTag> PoolTags { get; } = [];
+    public List<PoolTagInfo> PoolTags { get; } = [];
 
     ~PoolDataHandler()
     {
         Marshal.FreeHGlobal(_outputBuffer);
     }
 
-    public void ReadPoolInfo()
+    public void RefreshPoolInfo()
     {
         try
         {
@@ -29,7 +35,7 @@ internal class PoolDataHandler()
             {
                 _poolTagInfo = Marshal.PtrToStructure<SystemPoolTagInformation>(_outputBuffer);
                 //[todo] when we copy this should we just free?
-                InsertPoolTags();
+                RefreshStoredData();
             }
             else
             {
@@ -42,26 +48,42 @@ internal class PoolDataHandler()
             throw;
         }
     }
-    public void PrintPoolTag()
-    {
-        foreach (var systemPoolTag in PoolTags)
-        {
-            Console.WriteLine(UnsafeStructUtils.FormatPoolTag(systemPoolTag.Value));
-        }
-    }
 
-    private void InsertPoolTags()
+    private void RefreshStoredData()
     {
         unsafe
         {
             var tagsPtr = (SystemPoolTag*)(_outputBuffer + sizeof(ulong));
+            PoolTags.Clear();
             for (ulong i = 0; i < _poolTagInfo.Count; i++)
             {
                 var tag = tagsPtr[i];
-                if (!PoolTags.TryAdd(System.Text.Encoding.ASCII.GetString(tag.Tag.Tag, 4), tag))
+                var tagInfoPaged = new PoolTagInfo
                 {
-                    // todo process old and new tag.
-                }
+                    // TODO no need to convert to string.
+                    Tag = System.Text.Encoding.ASCII.GetString(tag.Tag.Tag, 4),
+                    Type = PoolType.Paged,
+                    Allocs = (int)(tag.PagedAllocs),
+                    Frees = (int)(tag.PagedFrees ),
+                    Bytes = (long)(tag.PagedUsed),
+                    Source = "Unknown", // Placeholder for source
+                    Description = "Unknown" // Placeholder for description
+                };
+
+                var tagInfoNonPaged = new PoolTagInfo
+                {
+                    // TODO no need to convert to string.
+                    Tag = System.Text.Encoding.ASCII.GetString(tag.Tag.Tag, 4),
+                    Type = PoolType.NonPaged,
+                    Allocs = (int)(tag.NonPagedAllocs),
+                    Frees = (int)(tag.NonPagedFrees),
+                    Bytes = (long)(tag.NonPagedUsed),
+                    Source = "Unknown", // Placeholder for source
+                    Description = "Unknown" // Placeholder for description
+                };
+
+                PoolTags.Add(tagInfoPaged);
+                PoolTags.Add(tagInfoNonPaged);
             }
         }
     }

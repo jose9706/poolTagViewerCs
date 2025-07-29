@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using poolViewer.Pool;
 
 namespace poolViewer;
 
