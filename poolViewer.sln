@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "poolViewer", "poolViewer\poolViewer.csproj", "{2D5EA98D-5B8F-4A0B-AF4B-1536EDB34172}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "poolConsole", "poolConsole\poolConsole.csproj", "{91D7BE17-6E36-419B-96BB-63BF3D97481D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2D5EA98D-5B8F-4A0B-AF4B-1536EDB34172}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D5EA98D-5B8F-4A0B-AF4B-1536EDB34172}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D5EA98D-5B8F-4A0B-AF4B-1536EDB34172}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D5EA98D-5B8F-4A0B-AF4B-1536EDB34172}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91D7BE17-6E36-419B-96BB-63BF3D97481D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91D7BE17-6E36-419B-96BB-63BF3D97481D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91D7BE17-6E36-419B-96BB-63BF3D97481D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91D7BE17-6E36-419B-96BB-63BF3D97481D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
