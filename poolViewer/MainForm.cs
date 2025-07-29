@@ -1,7 +1,6 @@
 using System.ComponentModel;
+using System.Reflection;
 using poolViewer.Pool;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace poolViewer;
 
@@ -16,6 +15,16 @@ internal partial class MainForm : Form
         _poolDataHandler = handler;
         InitializeComponent();
         AddMockData();
+        PerformanceHacksForDataGrid();
+    }
+
+    private void PerformanceHacksForDataGrid()
+    {
+        dataGridView1.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+        dataGridView1.RowHeadersVisible = false;
+        typeof(DataGridView).InvokeMember("DoubleBuffered",
+        BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.SetProperty,
+        null, dataGridView1, [true]);
     }
 
     private unsafe void AddMockData()
@@ -37,8 +46,8 @@ internal partial class MainForm : Form
                 Description = "Unknown" // Placeholder for description
             });
         }
-
         poolTagInfoBindingSource.DataSource = _poolTagInfoList;
+        timer1.Enabled = true;
     }
 
     private void dataGridView1_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
@@ -77,48 +86,43 @@ internal partial class MainForm : Form
 
     private unsafe void timer1_Tick(object sender, EventArgs e)
     {
-        _poolTagInfoList.Clear();
+        // _poolTagInfoList.Clear();
         _poolDataHandler.ReadPoolInfo();
         var newData = _poolDataHandler.PoolTags;
-        if (poolTagInfoBindingSource.DataSource is IList<PoolTagInfo> data)
+        foreach(DataGridViewRow row in dataGridView1.Rows)
         {
-            foreach (var item in data)
+            var poolInfo = (PoolTagInfo)row.DataBoundItem;
+            if(ComparePoolInfo(poolInfo, newData[poolInfo.Tag]))
             {
-                if(newData.ContainsKey(item.Tag))
-                {
-                    // update
-                    
-                } else
-                {
-                    //new 
-                }
+                row.DefaultCellStyle.ForeColor = Color.Red;
+            } else
+            {
+                row.DefaultCellStyle.ForeColor = Color.Black;
             }
         }
-        foreach (var tag in _poolDataHandler.PoolTags.Values)
-        {
-            _poolTagInfoList.Add(new PoolTagInfo
-            {
-                // TODO no need to convert to string/
-                Tag = System.Text.Encoding.ASCII.GetString(tag.Tag.Tag, 4),
-                Type = tag.PagedUsed > 0 ? "Paged" : "Non-Paged",
-                Allocs = (int)(tag.PagedAllocs + tag.NonPagedAllocs),
-                Frees = (int)(tag.PagedFrees + tag.NonPagedFrees),
-                Bytes = (long)(tag.PagedUsed + tag.NonPagedUsed),
-                Source = "Unknown", // Placeholder for source
-                Description = "Unknown" // Placeholder for description
-            });
-        }
-
-        poolTagInfoBindingSource.DataSource = _poolTagInfoList;
     }
 
-    private void UpdateData(IList<PoolTagInfo> currData, IEnumerable<SystemPoolTag> newData)
+    private bool ComparePoolInfo(PoolTagInfo oldPoolTagInfo, SystemPoolTag tag)
     {
+        if(oldPoolTagInfo.Type == "Paged")
+        {
+            if(oldPoolTagInfo.Frees != tag.PagedFrees || oldPoolTagInfo.Allocs != tag.PagedAllocs)
+            {
+                return true;
+            }
+        } else
+        {
+            if (oldPoolTagInfo.Frees != tag.NonPagedFrees || oldPoolTagInfo.Allocs != tag.NonPagedAllocs)
+            {
+                return true;
+            }
+        }
 
+        return false;
     }
 }
 
-public struct PoolTagInfo
+public class PoolTagInfo
 {
     public string Tag { get; set; }
     public string Type { get; set; }
