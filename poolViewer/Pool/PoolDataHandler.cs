@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Runtime.InteropServices;
 
 namespace poolViewer.Pool;
@@ -11,35 +12,39 @@ public enum PoolType
 internal class PoolDataHandler()
 {
     private SystemPoolTagInformation _poolTagInfo;
-    private readonly nint _outputBuffer = Marshal.AllocHGlobal(OsLibraryAccess.PoolTagSize);
+    // private readonly nint _outputBuffer = Marshal.AllocHGlobal(OsLibraryAccess.PoolTagSize);
+    private readonly byte[] _outputBuffer2 = ArrayPool<byte>.Shared.Rent(OsLibraryAccess.PoolTagSize);
 
     public List<PoolTagInfo> PoolTags { get; } = [];
 
     ~PoolDataHandler()
     {
-        Marshal.FreeHGlobal(_outputBuffer);
+        ArrayPool<byte>.Shared.Return(_outputBuffer2);
     }
 
-    public void RefreshPoolInfo()
+    public unsafe void RefreshPoolInfo()
     {
         try
         {
-            var status = OsLibraryAccess.NtQuerySystemInformation(
-                OsLibraryAccess.SystemInformationClass.SystemPoolTag,
-                _outputBuffer,
-                OsLibraryAccess.PoolTagSize,
-                out var returnLength
-            );
-
-            if (OsLibraryAccess.IsSuccess(status))
+            fixed (byte* ptr = _outputBuffer2)
             {
-                _poolTagInfo = Marshal.PtrToStructure<SystemPoolTagInformation>(_outputBuffer);
-                //[todo] when we copy this should we just free?
-                RefreshStoredData();
-            }
-            else
-            {
-                Console.WriteLine($"NtQuerySystemInformation failed. Status: 0x{status:X}");
+                var bufferPtr = (nint)ptr;
+                var status = OsLibraryAccess.NtQuerySystemInformation(
+                    OsLibraryAccess.SystemInformationClass.SystemPoolTag,
+                    bufferPtr,
+                    OsLibraryAccess.PoolTagSize,
+                    out var returnLength
+                );
+                if (OsLibraryAccess.IsSuccess(status))
+                {
+                    _poolTagInfo = Marshal.PtrToStructure<SystemPoolTagInformation>(bufferPtr);
+                    //[todo] when we copy this should we just free?
+                    RefreshStoredData(ptr);
+                }
+                else
+                {
+                    Console.WriteLine($"NtQuerySystemInformation failed. Status: 0x{status:X}");
+                }
             }
         }
         catch (Exception ex)
@@ -49,22 +54,21 @@ internal class PoolDataHandler()
         }
     }
 
-    private void RefreshStoredData()
+    private unsafe void RefreshStoredData(byte* ptr)
     {
         unsafe
         {
-            var tagsPtr = (SystemPoolTag*)(_outputBuffer + sizeof(ulong));
+            var tagsSpan = new Span<SystemPoolTag>(ptr + sizeof(ulong), (int)_poolTagInfo.Count);
             PoolTags.Clear();
-            for (ulong i = 0; i < _poolTagInfo.Count; i++)
+            foreach (var tag in tagsSpan)
             {
-                var tag = tagsPtr[i];
                 var tagInfoPaged = new PoolTagInfo
                 {
                     // TODO no need to convert to string.
                     Tag = System.Text.Encoding.ASCII.GetString(tag.Tag.Tag, 4),
                     Type = PoolType.Paged,
                     Allocs = (int)(tag.PagedAllocs),
-                    Frees = (int)(tag.PagedFrees ),
+                    Frees = (int)(tag.PagedFrees),
                     Bytes = (long)(tag.PagedUsed),
                     Source = "Unknown", // Placeholder for source
                     Description = "Unknown" // Placeholder for description

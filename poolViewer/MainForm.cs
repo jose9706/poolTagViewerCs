@@ -7,19 +7,69 @@ internal partial class MainForm : Form
 {
     private readonly PoolDataHandler _poolDataHandler;
     private SortOrder nextSorting = SortOrder.None;
+    private readonly List<ToolStripItem> _intervalRelatedMenuItems = [];
+    private readonly TimerState TimerState1Seconds;
+    private readonly TimerState TimerState2Seconds;
+    private readonly TimerState TimerState5Seconds;
+    private readonly TimerState TimerState10Seconds;
+    private readonly TimerHelper TimerHelper;
+
 
     public MainForm(PoolDataHandler handler)
     {
         _poolDataHandler = handler;
         InitializeComponent();
         PerformanceHacksForDataGrid();
+        DataFirstRefresh();
+        TimerConfigSetup();
+        dataGridView1.CellFormatting += dataGridView1_CellFormatting;
+        SaveDialogConfigSetup();
+
+
+
+        _intervalRelatedMenuItems.AddRange(IntervalMenuItem.DropDownItems.Cast<ToolStripItem>());
+        _intervalRelatedMenuItems.Add(pauseToolStripMenuItem);
+        TimerState1Seconds = new(Constants.Seconds1, Constants.RefreshText1Second, second1MenuItem);
+        TimerState2Seconds = new(Constants.Seconds2, Constants.RefreshText2Seconds, seconds2MenuItem);
+        TimerState5Seconds = new(Constants.Seconds5, Constants.RefreshText5Seconds, seconds5MenuItem);
+        TimerState10Seconds = new(Constants.Seconds10, Constants.RefreshText10Seconds, seconds10MenuItem);
+        TimerHelper = new(timer1, _intervalRelatedMenuItems, TimerState2Seconds, textBox1);
+    }
+
+    private void TimerConfigSetup()
+    {
+        timer1.Interval = Constants.Seconds2;
+        timer1.Enabled = true;
+        timer1.Start();
+        timer1.Tick += Timer1_Tick;
+        seconds2MenuItem.Checked = true;
+    }
+
+    private void SaveDialogConfigSetup()
+    {
+        saveFileDialog1.OverwritePrompt = true;
+        saveFileDialog1.DefaultExt = Constants.DefaultSaveFileExt;
+        saveFileDialog1.CheckWriteAccess = true;
+        saveFileDialog1.AddExtension = true;
+        saveFileDialog1.FileOk += SaveFileDialog1_FileOk;
+    }
+
+    private void SaveFileDialog1_FileOk(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        using var f = new StreamWriter(saveFileDialog1.FileName);
+        foreach (var item in _poolDataHandler.PoolTags)
+        {
+            f.WriteLine($"Tag: {item.Tag}, Type: {item.Type}, Allocs: {item.Allocs}, Frees: {item.Frees}, Bytes: {item.Bytes}, Source: {item.Source}, Description: {item.Description}");
+        }
+    }
+
+    private void DataFirstRefresh()
+    {
         _poolDataHandler.RefreshPoolInfo();
         foreach (var item in _poolDataHandler.PoolTags)
         {
             poolTagInfoBindingSource.List.Add(item);
         }
-        timer1.Enabled = true;
-        dataGridView1.CellFormatting += dataGridView1_CellFormatting;
     }
 
     private void PerformanceHacksForDataGrid()
@@ -31,7 +81,7 @@ internal partial class MainForm : Form
         null, dataGridView1, [true]);
     }
 
-    private void dataGridView1_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+    private void DataGridView1_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
     {
         var column = dataGridView1.Columns[e.ColumnIndex];
 
@@ -64,26 +114,19 @@ internal partial class MainForm : Form
 
     private static object GetPropertyVal(PoolTagInfo tagInfo, string propertyName)
     {
-        object retVal = propertyName switch
-        {
-            nameof(tagInfo.Tag) => tagInfo.Tag,
-            nameof(tagInfo.Type) => tagInfo.Type,
-            nameof(tagInfo.Source) => tagInfo.Source,
-            nameof(tagInfo.Frees) => tagInfo.Frees,
-            nameof(tagInfo.Allocs) => tagInfo.Allocs,
-            nameof(tagInfo.Bytes) => tagInfo.Bytes,
-            nameof(tagInfo.B_Alloc) => tagInfo.B_Alloc,
-            nameof(tagInfo.Description) => tagInfo.Description,
-            nameof(tagInfo.Diff) => tagInfo.Diff,
-            nameof(tagInfo.KB) => tagInfo.KB,
-            _ => throw new ArgumentException($"What even is this property... ? {propertyName}"),
-        };
+        // TODO a lot of boxing...
+        var property = typeof(PoolTagInfo).GetProperty(propertyName);
+        if (property == null)
+            throw new ArgumentException($"Property '{propertyName}' not found on PoolTagInfo");
+        
+        var retVal = property.GetValue(tagInfo)!;
         return retVal;
     }
 
-    private void UpdateBindingSourceEfficiently(List<PoolTagInfo> newPoolTags)
+    private void UpdateGrid()
     {
-        var newItems = newPoolTags.ToDictionary(item => new { item.Tag, item.Type });
+        _poolDataHandler.RefreshPoolInfo();
+        var newItems = _poolDataHandler.PoolTags.ToDictionary(item => new { item.Tag, item.Type });
         var existingItems = poolTagInfoBindingSource.List.Cast<PoolTagInfo>().ToDictionary(item => new { item.Tag, item.Type });
 
         foreach (var key in newItems.Keys)
@@ -111,14 +154,14 @@ internal partial class MainForm : Form
         dataGridView1.Refresh();
     }
 
-    private void SetRowChangeState(PoolTagInfo existingInfo, PoolTagInfo newInfo)
+    private static void SetRowChangeState(PoolTagInfo existingInfo, PoolTagInfo newInfo)
     {
-        if(newInfo.Diff > existingInfo.Diff)
+        if (newInfo.Diff > existingInfo.Diff)
         {
             existingInfo.Change = ChangeType.Increased;
             return;
         }
-        if(newInfo.Diff < existingInfo.Diff)
+        if (newInfo.Diff < existingInfo.Diff)
         {
             existingInfo.Change = ChangeType.Decreased;
             return;
@@ -127,11 +170,11 @@ internal partial class MainForm : Form
         existingInfo.Change = ChangeType.None;
     }
 
-    private void timer1_Tick(object sender, EventArgs e)
+    private void Timer1_Tick(object? sender, EventArgs e)
     {
-        _poolDataHandler.RefreshPoolInfo();
-        UpdateBindingSourceEfficiently(_poolDataHandler.PoolTags);
+        UpdateGrid();
     }
+
 
     private void dataGridView1_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
     {
@@ -144,5 +187,43 @@ internal partial class MainForm : Form
             else
                 dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.White;
         }
+    }
+
+    private void SaveToolStripMenuItem_Click(object? sender, EventArgs e)
+    {
+        saveFileDialog1.ShowDialog(this);
+    }
+
+    private void RefreshToolStripMenuItem_Click(object? sender, EventArgs e)
+    {
+        TimerHelper.SimplePause();
+        UpdateGrid();
+        TimerHelper.SimpleResume();
+    }
+
+    private void second1MenuItem_Click(object? sender, EventArgs e)
+    {
+        TimerHelper.SetTimerState(TimerState1Seconds, textBox1);
+    }
+
+    private void seconds2MenuItem_Click(object? sender, EventArgs e)
+    {
+        TimerHelper.SetTimerState(TimerState2Seconds, textBox1);
+    }
+
+    private void seconds5MenuItem_Click(object? sender, EventArgs e)
+    {
+        TimerHelper.SetTimerState(TimerState5Seconds, textBox1);
+
+    }
+
+    private void seconds10MenuItem_Click(object? sender, EventArgs e)
+    {
+        TimerHelper.SetTimerState(TimerState10Seconds, textBox1);
+    }
+
+    private void pauseToolStripMenuItem_Click(object? sender, EventArgs e)
+    {
+        TimerHelper.PauseOrResume(pauseToolStripMenuItem, textBox1);
     }
 }
