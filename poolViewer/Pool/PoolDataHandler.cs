@@ -9,17 +9,23 @@ public enum PoolType
     NonPaged
 };
 
-internal class PoolDataHandler()
+internal class PoolDataHandler() : IDisposable
 {
     private SystemPoolTagInformation _poolTagInfo;
-    // private readonly nint _outputBuffer = Marshal.AllocHGlobal(OsLibraryAccess.PoolTagSize);
     private readonly byte[] _outputBuffer2 = ArrayPool<byte>.Shared.Rent(OsLibraryAccess.PoolTagSize);
+    private static readonly string UnknownSource = "Unknown";
+    private static readonly string UnknownDescription = "Unknown";
+    private readonly Dictionary<uint, string> _tagStringCache = [];
+    private bool _disposed = false;
 
     public List<PoolTagInfo> PoolTags { get; } = [];
 
     ~PoolDataHandler()
     {
-        ArrayPool<byte>.Shared.Return(_outputBuffer2);
+        if (!_disposed)
+        {
+            ArrayPool<byte>.Shared.Return(_outputBuffer2);
+        }
     }
 
     public unsafe void RefreshPoolInfo()
@@ -59,36 +65,69 @@ internal class PoolDataHandler()
         unsafe
         {
             var tagsSpan = new Span<SystemPoolTag>(ptr + sizeof(ulong), (int)_poolTagInfo.Count);
+            var expectedCount = (int)_poolTagInfo.Count * 2;
+            if (PoolTags.Capacity < expectedCount)
+            {
+                PoolTags.Capacity = expectedCount;
+            }
             PoolTags.Clear();
             foreach (var tag in tagsSpan)
             {
+                var tagString = GetTagString(tag.Tag);
+
                 var tagInfoPaged = new PoolTagInfo
                 {
                     // TODO no need to convert to string.
-                    Tag = System.Text.Encoding.ASCII.GetString(tag.Tag.Tag, 4),
+                    Tag = tagString,
                     Type = PoolType.Paged,
                     Allocs = (int)(tag.PagedAllocs),
                     Frees = (int)(tag.PagedFrees),
                     Bytes = (long)(tag.PagedUsed),
-                    Source = "Unknown", // Placeholder for source
-                    Description = "Unknown" // Placeholder for description
+                    Source = UnknownSource, // Placeholder for source
+                    Description = UnknownDescription // Placeholder for description
                 };
 
                 var tagInfoNonPaged = new PoolTagInfo
                 {
                     // TODO no need to convert to string.
-                    Tag = System.Text.Encoding.ASCII.GetString(tag.Tag.Tag, 4),
+                    Tag = tagString,
                     Type = PoolType.NonPaged,
                     Allocs = (int)(tag.NonPagedAllocs),
                     Frees = (int)(tag.NonPagedFrees),
                     Bytes = (long)(tag.NonPagedUsed),
-                    Source = "Unknown", // Placeholder for source
-                    Description = "Unknown" // Placeholder for description
+                    Source = UnknownSource, // Placeholder for source
+                    Description = UnknownDescription // Placeholder for description
                 };
 
                 PoolTags.Add(tagInfoPaged);
                 PoolTags.Add(tagInfoNonPaged);
             }
         }
+    }
+
+    private string GetTagString(SystemPoolTag.TagUnion tagUnion)
+    {
+        if (!_tagStringCache.TryGetValue(tagUnion.TagUlong, out var tagString))
+        {
+            tagString = string.Create(4, tagUnion.TagUlong, static (span, tagUlong) =>
+            {
+                span[0] = (char)(tagUlong & 0xFF);
+                span[1] = (char)((tagUlong >> 8) & 0xFF);
+                span[2] = (char)((tagUlong >> 16) & 0xFF);
+                span[3] = (char)((tagUlong >> 24) & 0xFF);
+            });
+            _tagStringCache[tagUnion.TagUlong] = tagString;
+        }
+        return tagString;
+    }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            ArrayPool<byte>.Shared.Return(_outputBuffer2);
+            _disposed = true;
+        }
+        GC.SuppressFinalize(this);
     }
 }
