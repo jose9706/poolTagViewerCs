@@ -1,11 +1,6 @@
 using System.Runtime.InteropServices;
 namespace poolViewer.Pool;
 
-public enum NTSTATUS
-{
-    NT_SUCCESS = 0x0,
-}
-
 public static partial class OsLibraryAccess
 {
     public const int PoolTagSize = 1 << 21; // 2 MB

@@ -11,14 +11,28 @@ public enum PoolType
 
 internal class PoolDataHandler() : IDisposable
 {
-    private SystemPoolTagInformation _poolTagInfo;
+    private const string UnknownSource = "Unknown";
+    private const string UnknownDescription = "Unknown";
+
     private readonly byte[] _outputBuffer2 = ArrayPool<byte>.Shared.Rent(OsLibraryAccess.PoolTagSize);
-    private static readonly string UnknownSource = "Unknown";
-    private static readonly string UnknownDescription = "Unknown";
     private readonly Dictionary<uint, string> _tagStringCache = [];
+
+    private SystemPoolTagInformation _poolTagInfo;
     private bool _disposed = false;
+    private bool _filterActive = false;
+    private IList<string>? _filters;
 
     public List<PoolTagInfo> PoolTags { get; } = [];
+    
+    public IList<string>? Filter
+    {
+        private get => _filters;
+        set
+        {
+            _filterActive = value is { Count: > 0 };
+            _filters = value;
+        }
+    }
 
     ~PoolDataHandler()
     {
@@ -26,6 +40,12 @@ internal class PoolDataHandler() : IDisposable
         {
             ArrayPool<byte>.Shared.Return(_outputBuffer2);
         }
+    }
+
+    public void ClearFilter()
+    {
+        this._filterActive = false;
+        this._filters = null;
     }
 
     public unsafe void RefreshPoolInfo()
@@ -62,47 +82,60 @@ internal class PoolDataHandler() : IDisposable
 
     private unsafe void RefreshStoredData(byte* ptr)
     {
-        unsafe
+        var tagsSpan = new Span<SystemPoolTag>(ptr + sizeof(ulong), (int)_poolTagInfo.Count);
+        var expectedCount = (int)_poolTagInfo.Count * 2;
+        if (PoolTags.Capacity < expectedCount)
         {
-            var tagsSpan = new Span<SystemPoolTag>(ptr + sizeof(ulong), (int)_poolTagInfo.Count);
-            var expectedCount = (int)_poolTagInfo.Count * 2;
-            if (PoolTags.Capacity < expectedCount)
+            PoolTags.Capacity = expectedCount;
+        }
+
+        PoolTags.Clear();
+        foreach (var tag in tagsSpan)
+        {
+            var tagString = GetTagString(tag.Tag);
+
+            if (_filterActive)
             {
-                PoolTags.Capacity = expectedCount;
+                if (Filter!.Contains(tagString))
+                {
+                    InsertTag(tagString, tag);    
+                }
             }
-            PoolTags.Clear();
-            foreach (var tag in tagsSpan)
+            else
             {
-                var tagString = GetTagString(tag.Tag);
-
-                var tagInfoPaged = new PoolTagInfo
-                {
-                    // TODO no need to convert to string.
-                    Tag = tagString,
-                    Type = PoolType.Paged,
-                    Allocs = (int)(tag.PagedAllocs),
-                    Frees = (int)(tag.PagedFrees),
-                    Bytes = (long)(tag.PagedUsed),
-                    Source = UnknownSource, // Placeholder for source
-                    Description = UnknownDescription // Placeholder for description
-                };
-
-                var tagInfoNonPaged = new PoolTagInfo
-                {
-                    // TODO no need to convert to string.
-                    Tag = tagString,
-                    Type = PoolType.NonPaged,
-                    Allocs = (int)(tag.NonPagedAllocs),
-                    Frees = (int)(tag.NonPagedFrees),
-                    Bytes = (long)(tag.NonPagedUsed),
-                    Source = UnknownSource, // Placeholder for source
-                    Description = UnknownDescription // Placeholder for description
-                };
-
-                PoolTags.Add(tagInfoPaged);
-                PoolTags.Add(tagInfoNonPaged);
+                InsertTag(tagString, tag);
             }
         }
+    }
+
+    private void InsertTag(string tagString, SystemPoolTag tag)
+    {
+        var tagInfoPaged = new PoolTagInfo
+        {
+            // TODO no need to convert to string.
+            Tag = tagString,
+            Type = PoolType.Paged,
+            Allocs = (int)(tag.PagedAllocs),
+            Frees = (int)(tag.PagedFrees),
+            Bytes = (long)(tag.PagedUsed),
+            Source = UnknownSource, // Placeholder for source
+            Description = UnknownDescription // Placeholder for description
+        };
+
+        var tagInfoNonPaged = new PoolTagInfo
+        {
+            // TODO no need to convert to string.
+            Tag = tagString,
+            Type = PoolType.NonPaged,
+            Allocs = (int)(tag.NonPagedAllocs),
+            Frees = (int)(tag.NonPagedFrees),
+            Bytes = (long)(tag.NonPagedUsed),
+            Source = UnknownSource, // Placeholder for source
+            Description = UnknownDescription // Placeholder for description
+        };
+
+        PoolTags.Add(tagInfoPaged);
+        PoolTags.Add(tagInfoNonPaged);
     }
 
     private string GetTagString(SystemPoolTag.TagUnion tagUnion)

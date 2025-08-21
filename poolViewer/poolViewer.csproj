@@ -11,6 +11,9 @@
 
   <ItemGroup>
     <Compile Update="MainForm.cs" />
+    <Compile Update="FilterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 
 </Project>

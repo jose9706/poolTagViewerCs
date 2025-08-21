@@ -2,7 +2,7 @@ using Timer = System.Windows.Forms.Timer;
 
 namespace poolViewer;
 
-public class TimerState(int intervalMillisecond, string textToDisplay, ToolStripMenuItem toolStripItem)
+public struct TimerState(int intervalMillisecond, string textToDisplay, ToolStripMenuItem toolStripItem)
 {
     public int IntervalMillisecond { get; } = intervalMillisecond;
 

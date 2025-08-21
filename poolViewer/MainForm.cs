@@ -13,7 +13,7 @@ internal partial class MainForm : Form
     private readonly TimerState TimerState5Seconds;
     private readonly TimerState TimerState10Seconds;
     private readonly TimerHelper TimerHelper;
-
+    private readonly FilterForm FilterForm = new FilterForm();
 
     public MainForm(PoolDataHandler handler)
     {
@@ -24,16 +24,20 @@ internal partial class MainForm : Form
         TimerConfigSetup();
         dataGridView1.CellFormatting += dataGridView1_CellFormatting;
         SaveDialogConfigSetup();
-
-
-
         _intervalRelatedMenuItems.AddRange(IntervalMenuItem.DropDownItems.Cast<ToolStripItem>());
         _intervalRelatedMenuItems.Add(pauseToolStripMenuItem);
-        TimerState1Seconds = new(Constants.Seconds1, Constants.RefreshText1Second, second1MenuItem);
-        TimerState2Seconds = new(Constants.Seconds2, Constants.RefreshText2Seconds, seconds2MenuItem);
-        TimerState5Seconds = new(Constants.Seconds5, Constants.RefreshText5Seconds, seconds5MenuItem);
-        TimerState10Seconds = new(Constants.Seconds10, Constants.RefreshText10Seconds, seconds10MenuItem);
-        TimerHelper = new(timer1, _intervalRelatedMenuItems, TimerState2Seconds, textBox1);
+        TimerState1Seconds = new TimerState(Constants.Seconds1, Constants.RefreshText1Second, second1MenuItem);
+        TimerState2Seconds = new TimerState(Constants.Seconds2, Constants.RefreshText2Seconds, seconds2MenuItem);
+        TimerState5Seconds = new TimerState(Constants.Seconds5, Constants.RefreshText5Seconds, seconds5MenuItem);
+        TimerState10Seconds = new TimerState(Constants.Seconds10, Constants.RefreshText10Seconds, seconds10MenuItem);
+        TimerHelper = new TimerHelper(timer1, _intervalRelatedMenuItems, TimerState2Seconds, currIntervalBox);
+        FilterForm.FilterArrivedEvent += FilterFormOnFilterArrivedEvent;
+        FilterForm.FormClosing += FilterForm_FormClosing;
+    }
+
+    private void FilterFormOnFilterArrivedEvent(List<string> filters)
+    {
+        _poolDataHandler.Filter = filters;
     }
 
     private void TimerConfigSetup()
@@ -118,7 +122,7 @@ internal partial class MainForm : Form
         var property = typeof(PoolTagInfo).GetProperty(propertyName);
         if (property == null)
             throw new ArgumentException($"Property '{propertyName}' not found on PoolTagInfo");
-        
+
         var retVal = property.GetValue(tagInfo)!;
         return retVal;
     }
@@ -203,27 +207,46 @@ internal partial class MainForm : Form
 
     private void second1MenuItem_Click(object? sender, EventArgs e)
     {
-        TimerHelper.SetTimerState(TimerState1Seconds, textBox1);
+        TimerHelper.SetTimerState(TimerState1Seconds, currIntervalBox);
     }
 
     private void seconds2MenuItem_Click(object? sender, EventArgs e)
     {
-        TimerHelper.SetTimerState(TimerState2Seconds, textBox1);
+        TimerHelper.SetTimerState(TimerState2Seconds, currIntervalBox);
     }
 
     private void seconds5MenuItem_Click(object? sender, EventArgs e)
     {
-        TimerHelper.SetTimerState(TimerState5Seconds, textBox1);
-
+        TimerHelper.SetTimerState(TimerState5Seconds, currIntervalBox);
     }
 
     private void seconds10MenuItem_Click(object? sender, EventArgs e)
     {
-        TimerHelper.SetTimerState(TimerState10Seconds, textBox1);
+        TimerHelper.SetTimerState(TimerState10Seconds, currIntervalBox);
     }
 
     private void pauseToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        TimerHelper.PauseOrResume(pauseToolStripMenuItem, textBox1);
+        TimerHelper.PauseOrResume(pauseToolStripMenuItem, currIntervalBox);
+    }
+
+    private void FilterForm_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        // Just hide the window because its simple and we might need again :)
+        if (e.CloseReason == CloseReason.UserClosing)
+        {
+            e.Cancel = true;
+            FilterForm.Hide();
+        }
+    }
+
+    private void FilterClear_Click(object sender, EventArgs e)
+    {
+        _poolDataHandler.ClearFilter();
+    }
+
+    private void Filter_Click(object sender, EventArgs e)
+    {
+        FilterForm.Show(this);
     }
 }
