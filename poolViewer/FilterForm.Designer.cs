@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace poolViewer;
 
-partial class FilterForm
+sealed partial class FilterForm
 {
     /// <summary>
     /// Required designer variable.

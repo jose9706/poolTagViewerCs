@@ -1,22 +1,22 @@
 ﻿namespace poolViewer.Pool;
 
-public class PoolTagInfo
+public struct PoolTagInfo
 {
     public string Tag { get; set; }
 
     public PoolType Type { get; set; }
 
-    public int Allocs { get; set; }
+    public uint Allocs { get; set; }
 
-    public int Frees { get; set; }
+    public uint Frees { get; set; }
 
-    public int Diff => Allocs - Frees;
+    public uint Diff => Allocs - Frees;
 
-    public long Bytes { get; set; }
+    public ulong Bytes { get; set; }
 
-    public long KB => Bytes / 1024;
+    public ulong KB => Bytes >> 10;
 
-    public long B_Alloc => Allocs - Frees > 0 ? Bytes / (Allocs - Frees) : 0;
+    public ulong B_Alloc => Allocs - Frees > 0 ? Bytes / (Allocs - Frees) : 0;
 
     public string Source { get; set; }
 

@@ -1,7 +1,14 @@
 namespace poolViewer;
+using System.Text.RegularExpressions;
 
-internal partial class FilterForm : Form
+internal sealed partial class FilterForm : Form
 {
+    private List<Regex> Filters { get; } = new(10);
+    
+    public event NewFilter FilterArrivedEvent;
+    public delegate void NewFilter(List<Regex> filters);
+
+    
     public FilterForm()
     {
         InitializeComponent();
@@ -14,7 +21,6 @@ internal partial class FilterForm : Form
 
     private void button1_Click(object sender, EventArgs e)
     {
-        Console.WriteLine(this.richTextBox1.Text);
         if (ValidateFilter(this.richTextBox1.Text))
         {
             RaiseFilterArrivedEvent();
@@ -43,20 +49,16 @@ internal partial class FilterForm : Form
 
             if (!string.IsNullOrEmpty(line))
             {
-                Filters.Add(line);
+                // Compiled is slow but the one "paying" for it is this form.
+                Filters.Add(new Regex(line, RegexOptions.Singleline | RegexOptions.NonBacktracking | RegexOptions.Compiled));
             }
         }
 
         return true;
     }
-
-    public delegate void NewFilter(List<string> filters);
     
-    public List<string> Filters { get; set; } = new(10);
-    public event NewFilter FilterArrivedEvent;
-
-    protected virtual void RaiseFilterArrivedEvent()
+    private void RaiseFilterArrivedEvent()
     {
-        FilterArrivedEvent?.Invoke(this.Filters);
+        FilterArrivedEvent.Invoke(this.Filters);
     }
 }

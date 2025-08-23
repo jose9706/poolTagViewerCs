@@ -13,27 +13,33 @@ public struct TimerState(int intervalMillisecond, string textToDisplay, ToolStri
 
 public class TimerHelper
 {
+    private const string PausedText = "Paused";
+    private readonly Timer _timer;
+    private readonly IEnumerable<ToolStripItem> _intervalMenuItems;
     private bool _isPaused;
-    private readonly Timer timer;
-    private readonly IEnumerable<ToolStripItem> intervalMenuItems;
     private TimerState _prevState;
 
     public TimerHelper(Timer timer, IEnumerable<ToolStripItem> intervalMenuItems, TimerState initState, TextBox? textBox)
     {
-        this.timer = timer;
-        this.intervalMenuItems = intervalMenuItems;
+        this._timer = timer;
+        this._intervalMenuItems = intervalMenuItems;
         _prevState = initState;
 
         if (textBox != null)
         {
             textBox.Text = initState.TextToDisplay;
         }
-
     }
+
+    public bool IsPaused()
+    {
+        return _isPaused;
+    }
+    
     public void SetTimerState(TimerState timerState, TextBox? textBox)
     {
-        timer.Interval = timerState.IntervalMillisecond;
-        timer.Stop();
+        _timer.Interval = timerState.IntervalMillisecond;
+        _timer.Stop();
         ClearCheckedItemIntervalMenu();
         timerState.ToolStripItem.Checked = true;
 
@@ -44,12 +50,12 @@ public class TimerHelper
 
         _prevState = timerState;
         _isPaused = false;
-        timer.Start();
+        _timer.Start();
     }
 
-    public void SimplePause() => timer.Stop();
+    public void SimplePause() => _timer.Stop();
 
-    public void SimpleResume() => timer.Start();
+    public void SimpleResume() => _timer.Start();
 
     public void PauseOrResume(ToolStripMenuItem pauseMenuItem, TextBox? textBox)
     {
@@ -73,24 +79,24 @@ public class TimerHelper
         }
 
         _isPaused = false;
-        timer.Start();
+        _timer.Start();
     }
 
     private void Pause(ToolStripMenuItem pauseMenuItem, TextBox? textBox)
     {
-        timer.Stop();
+        _timer.Stop();
         _isPaused = true;
         ClearCheckedItemIntervalMenu();
         pauseMenuItem.Checked = true;
         if (textBox != null)
         {
-            textBox.Text = _prevState.TextToDisplay;
+            textBox.Text = PausedText;
         }
     }
 
     private void ClearCheckedItemIntervalMenu()
     {
-        foreach (var dropDownItem in intervalMenuItems)
+        foreach (var dropDownItem in _intervalMenuItems)
         {
             if (dropDownItem is ToolStripMenuItem item)
             {

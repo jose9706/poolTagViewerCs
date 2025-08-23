@@ -8,7 +8,6 @@ internal partial class MainForm : Form
         public const string RefreshText2Seconds = "Refreshing every 2 seconds";
         public const string RefreshText5Seconds = "Refreshing every 5 seconds";
         public const string RefreshText10Seconds = "Refreshing every 10 seconds";
-        public const string PausedText = "Paused refresh";
         public const int Seconds1 = 1000;
         public const int Seconds2 = 2000;
         public const int Seconds5 = 5000;

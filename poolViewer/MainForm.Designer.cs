@@ -57,9 +57,6 @@ partial class MainForm
         seconds10MenuItem = new ToolStripMenuItem();
         helpToolStripMenuItem = new ToolStripMenuItem();
         aboutToolStripMenuItem = new ToolStripMenuItem();
-        toolStripMenuItem1 = new ToolStripMenuItem();
-        toolStripMenuItem2 = new ToolStripMenuItem();
-        toolStripMenuItem3 = new ToolStripMenuItem();
         dataGridView1 = new DataGridView();
         tagDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
         typeDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
@@ -71,13 +68,11 @@ partial class MainForm
         bAllocDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
         sourceDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
         descriptionDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
-        poolTagInfoBindingSource = new BindingSource(components);
         timer1 = new System.Windows.Forms.Timer(components);
         saveFileDialog1 = new SaveFileDialog();
         currIntervalBox = new TextBox();
         menuStrip1.SuspendLayout();
         ((ISupportInitialize)dataGridView1).BeginInit();
-        ((ISupportInitialize)poolTagInfoBindingSource).BeginInit();
         SuspendLayout();
         // 
         // menuStrip1
@@ -156,21 +151,21 @@ partial class MainForm
         // Filter
         // 
         Filter.Name = "Filter";
-        Filter.Size = new Size(180, 22);
+        Filter.Size = new Size(126, 22);
         Filter.Text = "Filter";
         Filter.Click += Filter_Click;
         // 
         // filterClear
         // 
         filterClear.Name = "filterClear";
-        filterClear.Size = new Size(180, 22);
+        filterClear.Size = new Size(126, 22);
         filterClear.Text = "ClearFilter";
         filterClear.Click += FilterClear_Click;
         // 
         // CopyAll
         // 
         CopyAll.Name = "CopyAll";
-        CopyAll.Size = new Size(180, 22);
+        CopyAll.Size = new Size(126, 22);
         CopyAll.Text = "CopyAll";
         // 
         // viewToolStripMenuItem
@@ -244,21 +239,6 @@ partial class MainForm
         aboutToolStripMenuItem.Size = new Size(116, 22);
         aboutToolStripMenuItem.Text = "&About...";
         // 
-        // toolStripMenuItem1
-        // 
-        toolStripMenuItem1.Name = "toolStripMenuItem1";
-        toolStripMenuItem1.Size = new Size(32, 19);
-        // 
-        // toolStripMenuItem2
-        // 
-        toolStripMenuItem2.Name = "toolStripMenuItem2";
-        toolStripMenuItem2.Size = new Size(32, 19);
-        // 
-        // toolStripMenuItem3
-        // 
-        toolStripMenuItem3.Name = "toolStripMenuItem3";
-        toolStripMenuItem3.Size = new Size(32, 19);
-        // 
         // dataGridView1
         // 
         dataGridView1.AllowUserToAddRows = false;
@@ -268,7 +248,6 @@ partial class MainForm
         dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         dataGridView1.Columns.AddRange(new DataGridViewColumn[] { tagDataGridViewTextBoxColumn, typeDataGridViewTextBoxColumn, allocsDataGridViewTextBoxColumn, freesDataGridViewTextBoxColumn, diffDataGridViewTextBoxColumn, bytesDataGridViewTextBoxColumn, kBDataGridViewTextBoxColumn, bAllocDataGridViewTextBoxColumn, sourceDataGridViewTextBoxColumn, descriptionDataGridViewTextBoxColumn });
-        dataGridView1.DataSource = poolTagInfoBindingSource;
         dataGridView1.Dock = DockStyle.Fill;
         dataGridView1.Location = new Point(0, 24);
         dataGridView1.Name = "dataGridView1";
@@ -349,10 +328,6 @@ partial class MainForm
         descriptionDataGridViewTextBoxColumn.Name = "descriptionDataGridViewTextBoxColumn";
         descriptionDataGridViewTextBoxColumn.ReadOnly = true;
         // 
-        // poolTagInfoBindingSource
-        // 
-        poolTagInfoBindingSource.DataSource = typeof(PoolTagInfo);
-        // 
         // currIntervalBox
         // 
         currIntervalBox.Enabled = false;
@@ -377,7 +352,6 @@ partial class MainForm
         menuStrip1.ResumeLayout(false);
         menuStrip1.PerformLayout();
         ((ISupportInitialize)dataGridView1).EndInit();
-        ((ISupportInitialize)poolTagInfoBindingSource).EndInit();
         ResumeLayout(false);
         PerformLayout();
     }
@@ -414,7 +388,6 @@ partial class MainForm
     private System.Windows.Forms.ToolStripMenuItem seconds5MenuItem;
     private System.Windows.Forms.ToolStripMenuItem seconds10MenuItem;
     private System.Windows.Forms.DataGridView dataGridView1;
-    private BindingSource poolTagInfoBindingSource;
     private DataGridViewTextBoxColumn tagDataGridViewTextBoxColumn;
     private DataGridViewTextBoxColumn typeDataGridViewTextBoxColumn;
     private DataGridViewTextBoxColumn allocsDataGridViewTextBoxColumn;

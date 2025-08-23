@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace poolViewer.Pool;
 
@@ -18,13 +19,13 @@ internal class PoolDataHandler() : IDisposable
     private readonly Dictionary<uint, string> _tagStringCache = [];
 
     private SystemPoolTagInformation _poolTagInfo;
-    private bool _disposed = false;
-    private bool _filterActive = false;
-    private IList<string>? _filters;
+    private bool _disposed;
+    private bool _filterActive;
+    private IList<Regex>? _filters;
 
     public List<PoolTagInfo> PoolTags { get; } = [];
     
-    public IList<string>? Filter
+    public IList<Regex>? Filter
     {
         private get => _filters;
         set
@@ -80,6 +81,16 @@ internal class PoolDataHandler() : IDisposable
         }
     }
 
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            ArrayPool<byte>.Shared.Return(_outputBuffer2);
+            _disposed = true;
+        }
+        GC.SuppressFinalize(this);
+    }
+    
     private unsafe void RefreshStoredData(byte* ptr)
     {
         var tagsSpan = new Span<SystemPoolTag>(ptr + sizeof(ulong), (int)_poolTagInfo.Count);
@@ -96,9 +107,13 @@ internal class PoolDataHandler() : IDisposable
 
             if (_filterActive)
             {
-                if (Filter!.Contains(tagString))
+                foreach (var reg in Filter!)
                 {
-                    InsertTag(tagString, tag);    
+                    if (reg.IsMatch(tagString))
+                    {
+                        InsertTag(tagString, tag);
+                        break;
+                    }
                 }
             }
             else
@@ -115,9 +130,9 @@ internal class PoolDataHandler() : IDisposable
             // TODO no need to convert to string.
             Tag = tagString,
             Type = PoolType.Paged,
-            Allocs = (int)(tag.PagedAllocs),
-            Frees = (int)(tag.PagedFrees),
-            Bytes = (long)(tag.PagedUsed),
+            Allocs = (tag.PagedAllocs),
+            Frees = (tag.PagedFrees),
+            Bytes = (tag.PagedUsed),
             Source = UnknownSource, // Placeholder for source
             Description = UnknownDescription // Placeholder for description
         };
@@ -127,9 +142,9 @@ internal class PoolDataHandler() : IDisposable
             // TODO no need to convert to string.
             Tag = tagString,
             Type = PoolType.NonPaged,
-            Allocs = (int)(tag.NonPagedAllocs),
-            Frees = (int)(tag.NonPagedFrees),
-            Bytes = (long)(tag.NonPagedUsed),
+            Allocs = (tag.NonPagedAllocs),
+            Frees = (tag.NonPagedFrees),
+            Bytes = (tag.NonPagedUsed),
             Source = UnknownSource, // Placeholder for source
             Description = UnknownDescription // Placeholder for description
         };
@@ -152,15 +167,5 @@ internal class PoolDataHandler() : IDisposable
             _tagStringCache[tagUnion.TagUlong] = tagString;
         }
         return tagString;
-    }
-
-    public void Dispose()
-    {
-        if (!_disposed)
-        {
-            ArrayPool<byte>.Shared.Return(_outputBuffer2);
-            _disposed = true;
-        }
-        GC.SuppressFinalize(this);
     }
 }
