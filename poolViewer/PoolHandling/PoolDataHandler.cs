@@ -15,7 +15,7 @@ internal class PoolDataHandler() : IDisposable
     private const string UnknownSource = "Unknown";
     private const string UnknownDescription = "Unknown";
 
-    private readonly byte[] _outputBuffer2 = ArrayPool<byte>.Shared.Rent(PoolHandling.OsLibraryAccess.PoolTagSize);
+    private readonly byte[] _outputBuffer2 = ArrayPool<byte>.Shared.Rent(OsLibraryAccess.PoolTagSize);
     private readonly Dictionary<uint, string> _tagStringCache = [];
 
     private SystemPoolTagInformation _poolTagInfo;

@@ -5,7 +5,6 @@ internal class PoolGridController
     public PoolGridController(PoolDataHandler poolDataHandler)
     {
         _poolDataHandler = poolDataHandler;
-        
         // To have data ready.
         UpdateGrid();
     }
@@ -132,7 +131,7 @@ internal class PoolGridController
         }
     }
 
-    public void ApplySort(string columnName, SortOrder order)
+    private void ApplySort(string columnName, SortOrder order)
     {
         if (order == SortOrder.None)
         {
@@ -142,7 +141,7 @@ internal class PoolGridController
             return;
         }
 
-        if (!Comparer.TryGetValue(columnName, out var comparison))
+        if (!_comparer.TryGetValue(columnName, out var comparison))
             throw new InvalidOperationException($"Column {columnName} not found");
 
         _display.Sort(comparison);
@@ -151,7 +150,7 @@ internal class PoolGridController
     
     private readonly List<PoolTagInfo> _display = [];
     private Dictionary<(string Tag, PoolType Type), uint> _previousDiffs = new();
-    private readonly Dictionary<string, Comparison<PoolTagInfo>> Comparer = new()
+    private readonly Dictionary<string, Comparison<PoolTagInfo>> _comparer = new()
     {
         [nameof(PoolTagInfo.Tag)]         = (a, b) => string.CompareOrdinal(a.Tag, b.Tag),
         [nameof(PoolTagInfo.Type)]        = (a, b) => a.Type.CompareTo(b.Type),
