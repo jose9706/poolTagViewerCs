@@ -2,14 +2,10 @@ using Timer = System.Windows.Forms.Timer;
 
 namespace poolViewer;
 
-public struct TimerState(int intervalMillisecond, string textToDisplay, ToolStripMenuItem toolStripItem)
-{
-    public int IntervalMillisecond { get; } = intervalMillisecond;
-
-    public string TextToDisplay { get; } = textToDisplay;
-
-    public ToolStripMenuItem ToolStripItem { get; } = toolStripItem;
-}
+public readonly record struct TimerState(
+    int IntervalMillisecond,
+    string TextToDisplay,
+    ToolStripMenuItem ToolStripItem);
 
 public class TimerHelper
 {
@@ -21,6 +17,10 @@ public class TimerHelper
 
     public TimerHelper(Timer timer, IEnumerable<ToolStripItem> intervalMenuItems, TimerState initState, TextBox? textBox)
     {
+        ArgumentNullException.ThrowIfNull(timer);
+        ArgumentNullException.ThrowIfNull(intervalMenuItems);
+        ArgumentNullException.ThrowIfNull(initState.ToolStripItem);
+        
         this._timer = timer;
         this._intervalMenuItems = intervalMenuItems;
         _prevState = initState;

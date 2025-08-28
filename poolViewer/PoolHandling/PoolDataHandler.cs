@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
-namespace poolViewer.Pool;
+namespace poolViewer.PoolHandling;
 
 public enum PoolType
 {
@@ -15,7 +15,7 @@ internal class PoolDataHandler() : IDisposable
     private const string UnknownSource = "Unknown";
     private const string UnknownDescription = "Unknown";
 
-    private readonly byte[] _outputBuffer2 = ArrayPool<byte>.Shared.Rent(OsLibraryAccess.PoolTagSize);
+    private readonly byte[] _outputBuffer2 = ArrayPool<byte>.Shared.Rent(PoolHandling.OsLibraryAccess.PoolTagSize);
     private readonly Dictionary<uint, string> _tagStringCache = [];
 
     private SystemPoolTagInformation _poolTagInfo;
@@ -56,13 +56,13 @@ internal class PoolDataHandler() : IDisposable
             fixed (byte* ptr = _outputBuffer2)
             {
                 var bufferPtr = (nint)ptr;
-                var status = OsLibraryAccess.NtQuerySystemInformation(
-                    OsLibraryAccess.SystemInformationClass.SystemPoolTag,
+                var status = PoolHandling.OsLibraryAccess.NtQuerySystemInformation(
+                    PoolHandling.OsLibraryAccess.SystemInformationClass.SystemPoolTag,
                     bufferPtr,
-                    OsLibraryAccess.PoolTagSize,
+                    PoolHandling.OsLibraryAccess.PoolTagSize,
                     out var returnLength
                 );
-                if (OsLibraryAccess.IsSuccess(status))
+                if (PoolHandling.OsLibraryAccess.IsSuccess(status))
                 {
                     _poolTagInfo = Marshal.PtrToStructure<SystemPoolTagInformation>(bufferPtr);
                     //[todo] when we copy this should we just free?

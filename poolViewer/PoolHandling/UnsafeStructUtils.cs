@@ -1,4 +1,4 @@
-namespace poolViewer.Pool;
+namespace poolViewer.PoolHandling;
 
 public static class UnsafeStructUtils
 {

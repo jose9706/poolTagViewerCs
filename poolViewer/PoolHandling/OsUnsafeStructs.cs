@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
-
-namespace poolViewer.Pool;
+namespace poolViewer.PoolHandling;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct SystemBasicInformation

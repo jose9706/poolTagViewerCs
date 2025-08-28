@@ -1,5 +1,5 @@
 using System.Runtime.InteropServices;
-namespace poolViewer.Pool;
+namespace poolViewer.PoolHandling;
 
 public static partial class OsLibraryAccess
 {
