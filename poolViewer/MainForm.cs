@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using poolViewer.PoolHandling;
 
 namespace poolViewer;
@@ -14,7 +15,7 @@ internal partial class MainForm
     private readonly TimerState _timerState10Seconds;
     private readonly TimerHelper _timerHelper;
     private readonly FilterForm _filterForm = new();
-    private readonly Recorder poolTagRecorder;
+    private readonly SnapShoter poolTagRecorder;
     private readonly PoolGridController _poolGridController;
     private bool _recording = false;
 
@@ -35,7 +36,7 @@ internal partial class MainForm
         _intervalRelatedMenuItems.Add(pauseToolStripMenuItem);
 
         _poolGridController = new PoolGridController(_poolDataHandler);
-        poolTagRecorder = new Recorder(_poolDataHandler.PoolTags);
+        poolTagRecorder = new SnapShoter(_poolDataHandler.PoolTags);
         
         _timerState1Seconds = new TimerState(Constants.Seconds1, Constants.RefreshText1Second, second1MenuItem);
         _timerState2Seconds = new TimerState(Constants.Seconds2, Constants.RefreshText2Seconds, seconds2MenuItem);
@@ -45,12 +46,24 @@ internal partial class MainForm
     }
     
 #region FormCallbacks
-    private void SaveFileDialog1_FileOk(object? sender, System.ComponentModel.CancelEventArgs e)
+    private async void SaveFileDialog1_FileOk(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        using var f = new StreamWriter(saveFileDialog1.FileName);
-        foreach (var item in _poolDataHandler.PoolTags)
+        saveAsToolStripMenuItem.Enabled = false;
+        try
         {
-            f.WriteLine($"Tag: {item.Tag}, Type: {item.Type}, Allocs: {item.Allocs}, Frees: {item.Frees}, Bytes: {item.Bytes}, Source: {item.Source}, Description: {item.Description}");
+            await poolTagRecorder.TakeAndSaveSnapShotToFileAsync(saveFileDialog1.FileName);
+        }
+        catch (OperationCanceledException)
+        {
+            MessageBox.Show(this, "Save canceled.", "Canceled", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, $"Error saving snapshots: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            saveAsToolStripMenuItem.Enabled = true;
         }
     }
     private void DataGridView1_ColumnHeaderMouseClick(object? sender, DataGridViewCellMouseEventArgs e)
@@ -210,6 +223,9 @@ internal partial class MainForm
 
     private void SaveDialogConfigSetup()
     {
+        saveFileDialog1.Title = "Save Snapshot";
+        saveFileDialog1.Filter = "Text Files (.txt)|.txt|All Files (.)|."; // TODO filter working kind of weird.
+        saveFileDialog1.FileName = "snapshot.txt";
         saveFileDialog1.OverwritePrompt = true;
         saveFileDialog1.DefaultExt = Constants.DefaultSaveFileExt;
         saveFileDialog1.CheckWriteAccess = true;

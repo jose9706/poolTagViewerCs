@@ -4,19 +4,13 @@ internal class PoolGridController
 {
     public PoolGridController(PoolDataHandler poolDataHandler)
     {
+        ArgumentNullException.ThrowIfNull(poolDataHandler);
         _poolDataHandler = poolDataHandler;
         // To have data ready.
         UpdateGrid();
     }
-    
-    public void SaveToFile(string fileName)
-    {
-        using var f = new StreamWriter(fileName);
-        foreach (var item in _poolDataHandler.PoolTags)
-        {
-            f.WriteLine($"Tag: {item.Tag}, Type: {item.Type}, Allocs: {item.Allocs}, Frees: {item.Frees}, Bytes: {item.Bytes}, Source: {item.Source}, Description: {item.Description}");
-        }
-    }
+
+    public IReadOnlyList<PoolTagInfo> Display => _display;
 
     public object? GetCellValue(int rowIndex, string columnProperty)
     {
@@ -52,8 +46,6 @@ internal class PoolGridController
             _ => Color.White
         };
     }
-
-    public IReadOnlyList<PoolTagInfo> Display => _display;
 
     public void UpdateGrid()
     {

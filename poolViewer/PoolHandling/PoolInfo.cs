@@ -23,6 +23,8 @@ public struct PoolTagInfo
     public string Description { get; set; }
 
     public ChangeType Change { get; set; }
+
+    public override string ToString() => $"Tag:{Tag},Type:{Type},Allocs:{Allocs},Frees:{Frees},Diff:{Diff},Bytes:{Bytes},KB:{KB},BAlloc:{B_Alloc},Source:{Source},Description:{Description},Change:{Change}";
 }
 
 public enum ChangeType
