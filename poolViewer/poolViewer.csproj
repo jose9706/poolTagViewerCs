@@ -10,8 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Update="MainForm.cs" />
-    <Compile Update="FilterForm.cs">
+    <Compile Update="Forms\FilterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\FormConstants.cs">
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>

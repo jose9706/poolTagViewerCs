@@ -1,6 +1,6 @@
 using Timer = System.Windows.Forms.Timer;
 
-namespace poolViewer;
+namespace poolViewer.FormHelpers;
 
 public readonly record struct TimerState(
     int IntervalMillisecond,

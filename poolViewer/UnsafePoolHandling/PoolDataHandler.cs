@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
-namespace poolViewer.PoolHandling;
+namespace poolViewer.UnsafePoolHandling;
 
 public enum PoolType
 {
@@ -21,11 +21,11 @@ internal class PoolDataHandler() : IDisposable
     private SystemPoolTagInformation _poolTagInfo;
     private bool _disposed;
     private bool _filterActive;
-    private IList<Regex>? _filters;
+    private List<Regex>? _filters;
 
     public List<PoolTagInfo> PoolTags { get; } = [];
     
-    public IList<Regex>? Filter
+    public List<Regex>? Filter
     {
         private get => _filters;
         set
@@ -56,16 +56,15 @@ internal class PoolDataHandler() : IDisposable
             fixed (byte* ptr = _outputBuffer2)
             {
                 var bufferPtr = (nint)ptr;
-                var status = PoolHandling.OsLibraryAccess.NtQuerySystemInformation(
-                    PoolHandling.OsLibraryAccess.SystemInformationClass.SystemPoolTag,
+                var status = OsLibraryAccess.NtQuerySystemInformation(
+                    OsLibraryAccess.SystemInformationClass.SystemPoolTag,
                     bufferPtr,
-                    PoolHandling.OsLibraryAccess.PoolTagSize,
+                    OsLibraryAccess.PoolTagSize,
                     out var returnLength
                 );
-                if (PoolHandling.OsLibraryAccess.IsSuccess(status))
+                if (OsLibraryAccess.IsSuccess(status))
                 {
                     _poolTagInfo = Marshal.PtrToStructure<SystemPoolTagInformation>(bufferPtr);
-                    //[todo] when we copy this should we just free?
                     RefreshStoredData(ptr);
                 }
                 else
@@ -105,11 +104,11 @@ internal class PoolDataHandler() : IDisposable
         {
             var tagString = GetTagString(tag.Tag);
 
-            if (_filterActive)
+            if (_filterActive && Filter is { Count: > 0 })
             {
-                foreach (var reg in Filter!)
+                for (var i = 0; i < Filter.Count; i++)
                 {
-                    if (reg.IsMatch(tagString))
+                    if (Filter[i].IsMatch(tagString))
                     {
                         InsertTag(tagString, tag);
                         break;
@@ -127,7 +126,6 @@ internal class PoolDataHandler() : IDisposable
     {
         var tagInfoPaged = new PoolTagInfo
         {
-            // TODO no need to convert to string.
             Tag = tagString,
             Type = PoolType.Paged,
             Allocs = (tag.PagedAllocs),
@@ -139,7 +137,6 @@ internal class PoolDataHandler() : IDisposable
 
         var tagInfoNonPaged = new PoolTagInfo
         {
-            // TODO no need to convert to string.
             Tag = tagString,
             Type = PoolType.NonPaged,
             Allocs = (tag.NonPagedAllocs),

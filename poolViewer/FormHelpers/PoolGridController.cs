@@ -1,7 +1,45 @@
-namespace poolViewer.PoolHandling;
+using poolViewer.UnsafePoolHandling;
+
+namespace poolViewer.FormHelpers;
 
 internal class PoolGridController
 {
+    private readonly List<PoolTagInfo> _display = [];
+    private Dictionary<(string Tag, PoolType Type), uint> _currentDiffs = new();
+    private Dictionary<(string Tag, PoolType Type), uint> _previousDiffs = new();
+    private readonly Dictionary<string, Comparison<PoolTagInfo>> _comparer = new()
+    {
+        [nameof(PoolTagInfo.Tag)]         = (a, b) => string.CompareOrdinal(a.Tag, b.Tag),
+        [nameof(PoolTagInfo.Type)]        = (a, b) => a.Type.CompareTo(b.Type),
+        [nameof(PoolTagInfo.Allocs)]      = (a, b) => a.Allocs.CompareTo(b.Allocs),
+        [nameof(PoolTagInfo.Frees)]       = (a, b) => a.Frees.CompareTo(b.Frees),
+        [nameof(PoolTagInfo.Diff)]        = (a, b) => a.Diff.CompareTo(b.Diff),
+        [nameof(PoolTagInfo.Bytes)]       = (a, b) => a.Bytes.CompareTo(b.Bytes),
+        [nameof(PoolTagInfo.KB)]          = (a, b) => a.KB.CompareTo(b.KB),
+        [nameof(PoolTagInfo.B_Alloc)]     = (a, b) => a.B_Alloc.CompareTo(b.B_Alloc),
+        [nameof(PoolTagInfo.Source)]      = (a, b) => string.CompareOrdinal(a.Source, b.Source),
+        [nameof(PoolTagInfo.Description)] = (a, b) => string.CompareOrdinal(a.Description, b.Description)
+    };
+    
+    // Sorting state per column (property name)
+    private readonly Dictionary<string, SortOrder> _columnSortStates = new()
+    {
+        [nameof(PoolTagInfo.Tag)]         = SortOrder.None,
+        [nameof(PoolTagInfo.Type)]        = SortOrder.None,
+        [nameof(PoolTagInfo.Allocs)]      = SortOrder.None,
+        [nameof(PoolTagInfo.Frees)]       = SortOrder.None,
+        [nameof(PoolTagInfo.Diff)]        = SortOrder.None,
+        [nameof(PoolTagInfo.Bytes)]       = SortOrder.None,
+        [nameof(PoolTagInfo.KB)]          = SortOrder.None,
+        [nameof(PoolTagInfo.B_Alloc)]     = SortOrder.None,
+        [nameof(PoolTagInfo.Source)]      = SortOrder.None,
+        [nameof(PoolTagInfo.Description)] = SortOrder.None
+    };
+
+    private readonly PoolDataHandler _poolDataHandler;
+    
+    public IReadOnlyList<PoolTagInfo> Display => _display;
+    
     public PoolGridController(PoolDataHandler poolDataHandler)
     {
         ArgumentNullException.ThrowIfNull(poolDataHandler);
@@ -9,9 +47,7 @@ internal class PoolGridController
         // To have data ready.
         UpdateGrid();
     }
-
-    public IReadOnlyList<PoolTagInfo> Display => _display;
-
+    
     public object? GetCellValue(int rowIndex, string columnProperty)
     {
         if (rowIndex < 0 || rowIndex >= _display.Count) return null;
@@ -50,28 +86,40 @@ internal class PoolGridController
     public void UpdateGrid()
     {
         _poolDataHandler.RefreshPoolInfo();
-        var newDiffs = new Dictionary<(string Tag, PoolType Type), uint>(_poolDataHandler.PoolTags.Count);
+        
+        var prev = _previousDiffs;
+        var curr = _currentDiffs;
+
+        _currentDiffs.Clear();
+        _currentDiffs.EnsureCapacity(_poolDataHandler.PoolTags.Count);
 
         _display.Clear();
-        for (int i = 0; i < _poolDataHandler.PoolTags.Count; i++)
+        var src = _poolDataHandler.PoolTags;
+        for (int i = 0; i < src.Count; i++)
         {
-            var item =  _poolDataHandler.PoolTags[i];
+            var item = src[i];
             var key = (item.Tag, item.Type);
-            if (_previousDiffs.TryGetValue(key, out var prevDiff))
+
+            if (prev.TryGetValue(key, out var prevDiff))
             {
-                if (item.Diff > prevDiff) item.Change = ChangeType.Increased;
-                else if (item.Diff < prevDiff) item.Change = ChangeType.Decreased;
-                else item.Change = ChangeType.None;
+                item.Change = item.Diff > prevDiff
+                    ? ChangeType.Increased
+                    : item.Diff < prevDiff
+                        ? ChangeType.Decreased
+                        : ChangeType.None;
             }
             else
             {
                 item.Change = ChangeType.None;
             }
-            newDiffs[key] = item.Diff;
+
+            curr[key] = item.Diff;
             _display.Add(item);
         }
+        
+        _previousDiffs = curr;
+        _currentDiffs = prev;
 
-        _previousDiffs = newDiffs;
         ApplyActiveSort();
     }
     
@@ -139,37 +187,4 @@ internal class PoolGridController
         _display.Sort(comparison);
         if (order == SortOrder.Descending) _display.Reverse();
     }
-    
-    private readonly List<PoolTagInfo> _display = [];
-    private Dictionary<(string Tag, PoolType Type), uint> _previousDiffs = new();
-    private readonly Dictionary<string, Comparison<PoolTagInfo>> _comparer = new()
-    {
-        [nameof(PoolTagInfo.Tag)]         = (a, b) => string.CompareOrdinal(a.Tag, b.Tag),
-        [nameof(PoolTagInfo.Type)]        = (a, b) => a.Type.CompareTo(b.Type),
-        [nameof(PoolTagInfo.Allocs)]      = (a, b) => a.Allocs.CompareTo(b.Allocs),
-        [nameof(PoolTagInfo.Frees)]       = (a, b) => a.Frees.CompareTo(b.Frees),
-        [nameof(PoolTagInfo.Diff)]        = (a, b) => a.Diff.CompareTo(b.Diff),
-        [nameof(PoolTagInfo.Bytes)]       = (a, b) => a.Bytes.CompareTo(b.Bytes),
-        [nameof(PoolTagInfo.KB)]          = (a, b) => a.KB.CompareTo(b.KB),
-        [nameof(PoolTagInfo.B_Alloc)]     = (a, b) => a.B_Alloc.CompareTo(b.B_Alloc),
-        [nameof(PoolTagInfo.Source)]      = (a, b) => string.CompareOrdinal(a.Source, b.Source),
-        [nameof(PoolTagInfo.Description)] = (a, b) => string.CompareOrdinal(a.Description, b.Description)
-    };
-    
-    // Sorting state per column (property name)
-    private readonly Dictionary<string, SortOrder> _columnSortStates = new()
-    {
-        [nameof(PoolTagInfo.Tag)]         = SortOrder.None,
-        [nameof(PoolTagInfo.Type)]        = SortOrder.None,
-        [nameof(PoolTagInfo.Allocs)]      = SortOrder.None,
-        [nameof(PoolTagInfo.Frees)]       = SortOrder.None,
-        [nameof(PoolTagInfo.Diff)]        = SortOrder.None,
-        [nameof(PoolTagInfo.Bytes)]       = SortOrder.None,
-        [nameof(PoolTagInfo.KB)]          = SortOrder.None,
-        [nameof(PoolTagInfo.B_Alloc)]     = SortOrder.None,
-        [nameof(PoolTagInfo.Source)]      = SortOrder.None,
-        [nameof(PoolTagInfo.Description)] = SortOrder.None
-    };
-
-    private readonly PoolDataHandler _poolDataHandler;
 }

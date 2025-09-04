@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace poolViewer;
+namespace poolViewer.Forms;
 
 partial class MainForm
 {
@@ -33,6 +33,9 @@ partial class MainForm
     {
         components = new System.ComponentModel.Container();
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+        System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+        System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+        System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
         menuStrip1 = new System.Windows.Forms.MenuStrip();
         fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
         newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -246,12 +249,36 @@ partial class MainForm
         dataGridView1.AllowUserToOrderColumns = true;
         dataGridView1.AutoGenerateColumns = false;
         dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+        dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+        dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+        dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 9F);
+        dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+        dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+        dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+        dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+        dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
         dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { tagDataGridViewTextBoxColumn, typeDataGridViewTextBoxColumn, allocsDataGridViewTextBoxColumn, freesDataGridViewTextBoxColumn, diffDataGridViewTextBoxColumn, bytesDataGridViewTextBoxColumn, kBDataGridViewTextBoxColumn, bAllocDataGridViewTextBoxColumn, sourceDataGridViewTextBoxColumn, descriptionDataGridViewTextBoxColumn });
+        dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+        dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+        dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 9F);
+        dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+        dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+        dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+        dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+        dataGridView1.DefaultCellStyle = dataGridViewCellStyle2;
         dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
         dataGridView1.Location = new System.Drawing.Point(0, 24);
         dataGridView1.Name = "dataGridView1";
         dataGridView1.ReadOnly = true;
+        dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+        dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+        dataGridViewCellStyle3.Font = new System.Drawing.Font("Segoe UI", 9F);
+        dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+        dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+        dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+        dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+        dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
         dataGridView1.RowHeadersVisible = false;
         dataGridView1.Size = new System.Drawing.Size(1050, 580);
         dataGridView1.TabIndex = 1;
@@ -351,12 +378,13 @@ partial class MainForm
         // 
         // button1
         // 
-        button1.BackColor = System.Drawing.Color.White;
-        button1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+        button1.BackColor = System.Drawing.SystemColors.Control;
+        button1.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+        button1.Font = new System.Drawing.Font("Segoe UI Light", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)0));
         button1.ForeColor = System.Drawing.Color.Red;
         button1.Location = new System.Drawing.Point(690, 0);
         button1.Name = "button1";
-        button1.Size = new System.Drawing.Size(71, 25);
+        button1.Size = new System.Drawing.Size(71, 23);
         button1.TabIndex = 3;
         button1.Text = "Record";
         button1.UseVisualStyleBackColor = false;

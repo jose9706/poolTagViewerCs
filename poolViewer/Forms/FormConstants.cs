@@ -1,4 +1,4 @@
-namespace poolViewer;
+namespace poolViewer.Forms;
 
 internal partial class MainForm : Form
 {

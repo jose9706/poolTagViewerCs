@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
-namespace poolViewer.PoolHandling;
+
+namespace poolViewer.UnsafePoolHandling;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct SystemBasicInformation
@@ -21,7 +22,7 @@ public struct SystemBasicInformation
 public unsafe struct SystemPoolTagInformation
 {
     public ulong Count;
-    public SystemPoolTag* TagInfo; // Use a pointer to SYSTEM_POOLTAG instead of a fixed-size buffer  
+    public SystemPoolTag* TagInfo;
 }
 
 [StructLayout(LayoutKind.Sequential)]

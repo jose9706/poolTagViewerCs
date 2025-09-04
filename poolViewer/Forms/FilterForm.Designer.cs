@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace poolViewer;
+namespace poolViewer.Forms;
 
 sealed partial class FilterForm
 {

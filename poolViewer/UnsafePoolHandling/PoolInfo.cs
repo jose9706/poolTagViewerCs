@@ -1,4 +1,4 @@
-﻿namespace poolViewer.PoolHandling;
+﻿namespace poolViewer.UnsafePoolHandling;
 
 public struct PoolTagInfo
 {
@@ -24,7 +24,7 @@ public struct PoolTagInfo
 
     public ChangeType Change { get; set; }
 
-    public override string ToString() => $"Tag:{Tag},Type:{Type},Allocs:{Allocs},Frees:{Frees},Diff:{Diff},Bytes:{Bytes},KB:{KB},BAlloc:{B_Alloc},Source:{Source},Description:{Description},Change:{Change}";
+    public override string ToString() => $"Tag:{Tag},Type:{Type},Allocs:{Allocs},Frees:{Frees},Diff:{Diff},Bytes:{Bytes},KB:{KB},BAlloc:{B_Alloc},Source:{Source},Description:{Description},Change:{Change.ToString()}";
 }
 
 public enum ChangeType
