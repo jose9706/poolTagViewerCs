@@ -1,4 +1,4 @@
-# poolViewer
+# PoolViewerCs
 
 Tool to inspect Windows pool tag usage in real time. Basically does what Poolmon does but with a GUI and hopefully easier to use.
 
