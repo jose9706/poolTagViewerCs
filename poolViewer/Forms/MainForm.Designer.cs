@@ -264,8 +264,8 @@ partial class MainForm
         // 
         // allocsDataGridViewTextBoxColumn
         // 
-        allocsDataGridViewTextBoxColumn.DataPropertyName = "Allocs";
-        allocsDataGridViewTextBoxColumn.HeaderText = "Allocs";
+        allocsDataGridViewTextBoxColumn.DataPropertyName = "Allocations";
+        allocsDataGridViewTextBoxColumn.HeaderText = "Allocations";
         allocsDataGridViewTextBoxColumn.Name = "allocsDataGridViewTextBoxColumn";
         allocsDataGridViewTextBoxColumn.ReadOnly = true;
         allocsDataGridViewTextBoxColumn.Width = 105;
@@ -296,16 +296,16 @@ partial class MainForm
         // 
         // kBDataGridViewTextBoxColumn
         // 
-        kBDataGridViewTextBoxColumn.DataPropertyName = "KB";
-        kBDataGridViewTextBoxColumn.HeaderText = "KB";
+        kBDataGridViewTextBoxColumn.DataPropertyName = "Kb";
+        kBDataGridViewTextBoxColumn.HeaderText = "Kb";
         kBDataGridViewTextBoxColumn.Name = "kBDataGridViewTextBoxColumn";
         kBDataGridViewTextBoxColumn.ReadOnly = true;
         kBDataGridViewTextBoxColumn.Width = 105;
         // 
         // bAllocDataGridViewTextBoxColumn
         // 
-        bAllocDataGridViewTextBoxColumn.DataPropertyName = "B_Alloc";
-        bAllocDataGridViewTextBoxColumn.HeaderText = "B_Alloc";
+        bAllocDataGridViewTextBoxColumn.DataPropertyName = "BytesAllocated";
+        bAllocDataGridViewTextBoxColumn.HeaderText = "BytesAllocated";
         bAllocDataGridViewTextBoxColumn.Name = "bAllocDataGridViewTextBoxColumn";
         bAllocDataGridViewTextBoxColumn.ReadOnly = true;
         bAllocDataGridViewTextBoxColumn.Width = 105;
