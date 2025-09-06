@@ -4,7 +4,7 @@ public class PoolGridRecorder(SnapShoter poolTagRecorder)
 {
     private bool _recording;
 
-    public event EventHandler RecordingFailedEvent;
+    public event EventHandler? RecordingFailedEvent;
     
     public void UpdateRecordState(out bool recordingToSave)
     {
