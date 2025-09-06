@@ -28,29 +28,30 @@ internal partial class MainForm
         EnableVirtualMode();
         TimerConfigSetup();
         SaveDialogConfigSetup();
-        dataGridView1.CellFormatting += DataGridView1_CellFormatting;
+        
+        dataGridView1.CellFormatting   += DataGridView1_CellFormatting;
         _filterForm.FilterArrivedEvent += FilterFormOnFilterArrivedEvent;
-        _filterForm.FormClosing += FilterForm_FormClosing;
+        _filterForm.FormClosing        += FilterForm_FormClosing;
         
         _intervalRelatedMenuItems.AddRange(IntervalMenuItem.DropDownItems.Cast<ToolStripItem>());
         _intervalRelatedMenuItems.Add(pauseToolStripMenuItem);
 
         _poolGridController = new PoolGridController(_poolDataHandler);
-        _poolTagSnapShoter = new SnapShoter(_poolDataHandler.PoolTags);
-        _poolGridRecorder = new PoolGridRecorder(_poolTagSnapShoter);
+        _poolTagSnapShoter  = new SnapShoter(_poolGridController.Display);
+        _poolGridRecorder   = new PoolGridRecorder(_poolTagSnapShoter);
         _poolGridRecorder.RecordingFailedEvent += RecordingFailed;
         
-        _timerState1Seconds = new TimerState(Constants.Seconds1, Constants.RefreshText1Second, second1MenuItem);
-        _timerState2Seconds = new TimerState(Constants.Seconds2, Constants.RefreshText2Seconds, seconds2MenuItem);
-        _timerState5Seconds = new TimerState(Constants.Seconds5, Constants.RefreshText5Seconds, seconds5MenuItem);
+        _timerState1Seconds  = new TimerState(Constants.Seconds1, Constants.RefreshText1Second, second1MenuItem);
+        _timerState2Seconds  = new TimerState(Constants.Seconds2, Constants.RefreshText2Seconds, seconds2MenuItem);
+        _timerState5Seconds  = new TimerState(Constants.Seconds5, Constants.RefreshText5Seconds, seconds5MenuItem);
         _timerState10Seconds = new TimerState(Constants.Seconds10, Constants.RefreshText10Seconds, seconds10MenuItem);
-        _timerHelper = new TimerHelper(timer1, _intervalRelatedMenuItems, _timerState2Seconds, currIntervalBox);
+        _timerHelper         = new TimerHelper(timer1, _intervalRelatedMenuItems, _timerState2Seconds, currIntervalBox);
     }
     
 #region FormCallbacks
-    private async void SaveFileDialog1_FileOk(object? sender, System.ComponentModel.CancelEventArgs e)
+    private async Task SaveFileWithSnapShot()
     {
-        saveAsToolStripMenuItem.Enabled = false;
+        saveToolStripMenuItem.Enabled = false;
         try
         {
             var result = await _poolTagSnapShoter.TakeAndSaveSnapShotToFileAsync(saveFileDialog1.FileName);
@@ -65,7 +66,7 @@ internal partial class MainForm
         }
         finally
         {
-            saveAsToolStripMenuItem.Enabled = true;
+            saveToolStripMenuItem.Enabled = true;
         }
     }
     private void DataGridView1_ColumnHeaderMouseClick(object? sender, DataGridViewCellMouseEventArgs e)
@@ -93,9 +94,13 @@ internal partial class MainForm
         dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = rowColor ?? Color.Gray;
     }
 
-    private void SaveToolStripMenuItem_Click(object? sender, EventArgs e)
+    private async void SaveToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        saveFileDialog1.ShowDialog(this); // need to fix this.
+        var result = saveFileDialog1.ShowDialog(this);
+        if (result == DialogResult.OK)
+        {
+            await SaveFileWithSnapShot();
+        }
     }
 
     private void RefreshToolStripMenuItem_Click(object? sender, EventArgs e)
@@ -170,8 +175,8 @@ internal partial class MainForm
         {
             if (this.saveFileDialog1.ShowDialog(this) == DialogResult.OK)
             {
-                var result =
-                    await _poolTagSnapShoter.SaveSnapshotsToFileAsync(this.saveFileDialog1.FileName, CancellationToken.None);
+                var result = await
+                    _poolTagSnapShoter.SaveSnapshotsToFileAsync(this.saveFileDialog1.FileName, CancellationToken.None);
                 if (!result.Success)
                 {
                     this.ShowInfoMessageWindow(result.ErrorMessage);
@@ -182,11 +187,14 @@ internal partial class MainForm
         }
         button1.Enabled = true;
     }
-#endregion
     
+    private void exitToolStripMenuItem_Click(object? sender, EventArgs e)
+    {
+        this.Close();
+    }
+#endregion
 
 #region FormUtilities
-
 private void RecordingFailed(object? sender, EventArgs e)
 {
     button1.Enabled = false;
@@ -256,7 +264,6 @@ private void RecordingFailed(object? sender, EventArgs e)
         saveFileDialog1.DefaultExt = Constants.DefaultSaveFileExt;
         saveFileDialog1.CheckWriteAccess = true;
         saveFileDialog1.AddExtension = true;
-        saveFileDialog1.FileOk += SaveFileDialog1_FileOk; // THIS IS WRONG
     }
 #endregion
 }

@@ -11,12 +11,12 @@ internal class PoolGridController
     {
         [nameof(PoolTagInfo.Tag)]         = (a, b) => string.CompareOrdinal(a.Tag, b.Tag),
         [nameof(PoolTagInfo.Type)]        = (a, b) => a.Type.CompareTo(b.Type),
-        [nameof(PoolTagInfo.Allocs)]      = (a, b) => a.Allocs.CompareTo(b.Allocs),
+        [nameof(PoolTagInfo.Allocations)]      = (a, b) => a.Allocations.CompareTo(b.Allocations),
         [nameof(PoolTagInfo.Frees)]       = (a, b) => a.Frees.CompareTo(b.Frees),
         [nameof(PoolTagInfo.Diff)]        = (a, b) => a.Diff.CompareTo(b.Diff),
         [nameof(PoolTagInfo.Bytes)]       = (a, b) => a.Bytes.CompareTo(b.Bytes),
-        [nameof(PoolTagInfo.KB)]          = (a, b) => a.KB.CompareTo(b.KB),
-        [nameof(PoolTagInfo.B_Alloc)]     = (a, b) => a.B_Alloc.CompareTo(b.B_Alloc),
+        [nameof(PoolTagInfo.Kb)]          = (a, b) => a.Kb.CompareTo(b.Kb),
+        [nameof(PoolTagInfo.BytesAllocated)]     = (a, b) => a.BytesAllocated.CompareTo(b.BytesAllocated),
         [nameof(PoolTagInfo.Source)]      = (a, b) => string.CompareOrdinal(a.Source, b.Source),
         [nameof(PoolTagInfo.Description)] = (a, b) => string.CompareOrdinal(a.Description, b.Description)
     };
@@ -26,12 +26,12 @@ internal class PoolGridController
     {
         [nameof(PoolTagInfo.Tag)]         = SortOrder.None,
         [nameof(PoolTagInfo.Type)]        = SortOrder.None,
-        [nameof(PoolTagInfo.Allocs)]      = SortOrder.None,
+        [nameof(PoolTagInfo.Allocations)]      = SortOrder.None,
         [nameof(PoolTagInfo.Frees)]       = SortOrder.None,
         [nameof(PoolTagInfo.Diff)]        = SortOrder.None,
         [nameof(PoolTagInfo.Bytes)]       = SortOrder.None,
-        [nameof(PoolTagInfo.KB)]          = SortOrder.None,
-        [nameof(PoolTagInfo.B_Alloc)]     = SortOrder.None,
+        [nameof(PoolTagInfo.Kb)]          = SortOrder.None,
+        [nameof(PoolTagInfo.BytesAllocated)]     = SortOrder.None,
         [nameof(PoolTagInfo.Source)]      = SortOrder.None,
         [nameof(PoolTagInfo.Description)] = SortOrder.None
     };
@@ -57,12 +57,12 @@ internal class PoolGridController
         {
             nameof(PoolTagInfo.Tag)         => item.Tag,
             nameof(PoolTagInfo.Type)        => item.Type,
-            nameof(PoolTagInfo.Allocs)      => item.Allocs,
+            nameof(PoolTagInfo.Allocations)      => item.Allocations,
             nameof(PoolTagInfo.Frees)       => item.Frees,
             nameof(PoolTagInfo.Diff)        => item.Diff,
             nameof(PoolTagInfo.Bytes)       => item.Bytes,
-            nameof(PoolTagInfo.KB)          => item.KB,
-            nameof(PoolTagInfo.B_Alloc)     => item.B_Alloc,
+            nameof(PoolTagInfo.Kb)          => item.Kb,
+            nameof(PoolTagInfo.BytesAllocated)     => item.BytesAllocated,
             nameof(PoolTagInfo.Source)      => item.Source,
             nameof(PoolTagInfo.Description) => item.Description,
             _ => null

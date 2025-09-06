@@ -1,4 +1,10 @@
 ﻿namespace poolViewer.UnsafePoolHandling;
+public enum ChangeType
+{
+    None,
+    Increased,
+    Decreased
+}
 
 public struct PoolTagInfo
 {
@@ -6,17 +12,17 @@ public struct PoolTagInfo
 
     public PoolType Type { get; set; }
 
-    public uint Allocs { get; set; }
+    public uint Allocations { get; set; }
 
     public uint Frees { get; set; }
 
-    public uint Diff => Allocs - Frees;
+    public uint Diff => Allocations - Frees;
 
     public ulong Bytes { get; set; }
 
-    public ulong KB => Bytes >> 10;
+    public ulong Kb => Bytes >> 10;
 
-    public ulong B_Alloc => Allocs - Frees > 0 ? Bytes / (Allocs - Frees) : 0;
+    public ulong BytesAllocated => Allocations - Frees > 0 ? Bytes / (Allocations - Frees) : 0;
 
     public string Source { get; set; }
 
@@ -24,12 +30,5 @@ public struct PoolTagInfo
 
     public ChangeType Change { get; set; }
 
-    public override string ToString() => $"Tag:{Tag},Type:{Type},Allocs:{Allocs},Frees:{Frees},Diff:{Diff},Bytes:{Bytes},KB:{KB},BAlloc:{B_Alloc},Source:{Source},Description:{Description},Change:{Change.ToString()}";
-}
-
-public enum ChangeType
-{
-    None,
-    Increased,
-    Decreased
+    public override string ToString() => $"Tag:{Tag},Type:{Type},Allocs:{Allocations},Frees:{Frees},Diff:{Diff},Bytes:{Bytes},KB:{Kb},BAlloc:{BytesAllocated},Source:{Source},Description:{Description},Change:{Change.ToString()}";
 }

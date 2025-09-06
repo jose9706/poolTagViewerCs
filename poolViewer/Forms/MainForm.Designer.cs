@@ -38,17 +38,12 @@ partial class MainForm
         System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
         menuStrip1 = new System.Windows.Forms.MenuStrip();
         fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-        newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-        openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-        toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
         saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-        saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
         toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
         exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
         toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
         Filter = new System.Windows.Forms.ToolStripMenuItem();
         filterClear = new System.Windows.Forms.ToolStripMenuItem();
-        CopyAll = new System.Windows.Forms.ToolStripMenuItem();
         viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
         pauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
         RefreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -89,33 +84,10 @@ partial class MainForm
         // 
         // fileToolStripMenuItem
         // 
-        fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { newToolStripMenuItem, openToolStripMenuItem, toolStripSeparator, saveToolStripMenuItem, saveAsToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
+        fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { saveToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
         fileToolStripMenuItem.Name = "fileToolStripMenuItem";
         fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
         fileToolStripMenuItem.Text = "&File";
-        // 
-        // newToolStripMenuItem
-        // 
-        newToolStripMenuItem.Image = ((System.Drawing.Image)resources.GetObject("newToolStripMenuItem.Image"));
-        newToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
-        newToolStripMenuItem.Name = "newToolStripMenuItem";
-        newToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N));
-        newToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
-        newToolStripMenuItem.Text = "&New";
-        // 
-        // openToolStripMenuItem
-        // 
-        openToolStripMenuItem.Image = ((System.Drawing.Image)resources.GetObject("openToolStripMenuItem.Image"));
-        openToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
-        openToolStripMenuItem.Name = "openToolStripMenuItem";
-        openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O));
-        openToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
-        openToolStripMenuItem.Text = "&Open";
-        // 
-        // toolStripSeparator
-        // 
-        toolStripSeparator.Name = "toolStripSeparator";
-        toolStripSeparator.Size = new System.Drawing.Size(143, 6);
         // 
         // saveToolStripMenuItem
         // 
@@ -123,30 +95,25 @@ partial class MainForm
         saveToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
         saveToolStripMenuItem.Name = "saveToolStripMenuItem";
         saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S));
-        saveToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+        saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
         saveToolStripMenuItem.Text = "&Save";
         saveToolStripMenuItem.Click += SaveToolStripMenuItem_Click;
-        // 
-        // saveAsToolStripMenuItem
-        // 
-        saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-        saveAsToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
-        saveAsToolStripMenuItem.Text = "Save &As";
         // 
         // toolStripSeparator1
         // 
         toolStripSeparator1.Name = "toolStripSeparator1";
-        toolStripSeparator1.Size = new System.Drawing.Size(143, 6);
+        toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
         // 
         // exitToolStripMenuItem
         // 
         exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-        exitToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+        exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
         exitToolStripMenuItem.Text = "E&xit";
+        exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
         // 
         // toolStripMenuItem4
         // 
-        toolStripMenuItem4.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { Filter, filterClear, CopyAll });
+        toolStripMenuItem4.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { Filter, filterClear });
         toolStripMenuItem4.Name = "toolStripMenuItem4";
         toolStripMenuItem4.Size = new System.Drawing.Size(39, 20);
         toolStripMenuItem4.Text = "Edit";
@@ -164,12 +131,6 @@ partial class MainForm
         filterClear.Size = new System.Drawing.Size(127, 22);
         filterClear.Text = "ClearFilter";
         filterClear.Click += FilterClear_Click;
-        // 
-        // CopyAll
-        // 
-        CopyAll.Name = "CopyAll";
-        CopyAll.Size = new System.Drawing.Size(127, 22);
-        CopyAll.Text = "CopyAll";
         // 
         // viewToolStripMenuItem
         // 
@@ -384,7 +345,7 @@ partial class MainForm
         button1.ForeColor = System.Drawing.Color.Red;
         button1.Location = new System.Drawing.Point(690, 0);
         button1.Name = "button1";
-        button1.Size = new System.Drawing.Size(71, 23);
+        button1.Size = new System.Drawing.Size(136, 23);
         button1.TabIndex = 3;
         button1.Text = "Record";
         button1.UseVisualStyleBackColor = false;
@@ -409,21 +370,9 @@ partial class MainForm
     }
 
     private System.Windows.Forms.Button button1;
-
     private System.Windows.Forms.TextBox currIntervalBox;
-
-    private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
-
-    private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
-
-    private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
-
     private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-    private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
-    private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
-    private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
     private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
-    private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
@@ -431,7 +380,6 @@ partial class MainForm
     private System.Windows.Forms.ToolStripMenuItem RefreshToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-
     private System.Windows.Forms.MenuStrip menuStrip1;
 
     #endregion
@@ -456,6 +404,5 @@ partial class MainForm
     private SaveFileDialog saveFileDialog1;
     private ToolStripMenuItem toolStripMenuItem4;
     private ToolStripMenuItem Filter;
-    private ToolStripMenuItem CopyAll;
     private ToolStripMenuItem filterClear;
 }

@@ -22,7 +22,7 @@ internal sealed partial class FilterForm : Form
         this._filters.Clear();
     }
 
-    private void button1_Click(object sender, EventArgs e)
+    private void button1_Click(object? sender, EventArgs e)
     {
         if (ValidateFilter(this.richTextBox1.Text))
         {

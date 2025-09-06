@@ -128,7 +128,7 @@ internal class PoolDataHandler() : IDisposable
         {
             Tag = tagString,
             Type = PoolType.Paged,
-            Allocs = (tag.PagedAllocs),
+            Allocations = (tag.PagedAllocs),
             Frees = (tag.PagedFrees),
             Bytes = (tag.PagedUsed),
             Source = UnknownSource, // Placeholder for source
@@ -139,7 +139,7 @@ internal class PoolDataHandler() : IDisposable
         {
             Tag = tagString,
             Type = PoolType.NonPaged,
-            Allocs = (tag.NonPagedAllocs),
+            Allocations = (tag.NonPagedAllocs),
             Frees = (tag.NonPagedFrees),
             Bytes = (tag.NonPagedUsed),
             Source = UnknownSource, // Placeholder for source
